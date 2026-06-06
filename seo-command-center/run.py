@@ -40,11 +40,10 @@ def main():
     issues = server.RUN["issues"]
     rows = server.RUN.get("rows", [])
     title_issue = next((i for i in issues if i["type"] == "missing_title"), None)
+    fixed_titles = []
 
     if title_issue:
         urls_to_fix = title_issue["affected_urls"][:5]
-        fixed_titles = []
-
         import urllib.request, json
         for url in urls_to_fix:
             row = next((r for r in rows if r["Address"] == url), {})
@@ -67,8 +66,25 @@ def main():
             except Exception as e:
                 print(f"Ollama error for {url}: {e}")
 
-        if fixed_titles:
-            server.seo_set_fixes(titles=fixed_titles)
+    # --- Redirect Map Fixer ---
+    broken_issue = next((i for i in issues if i["type"] == "broken_link"), None)
+    redirect_map = []
+    if broken_issue:
+        broken_urls = broken_issue["affected_urls"][:5]
+        live_urls = [r["Address"] for r in rows if r.get("Status Code") == "200"]
+
+        for url in broken_urls:
+            slug = url.split("/")[-1] or url.split("/")[-2] if "/" in url else url
+            # Find a live URL that contains the slug
+            closest = next((u for u in live_urls if slug in u and u != url), None)
+            # Fallback to first live URL if no slug match
+            target = closest or (live_urls[0] if live_urls else None)
+
+            if target:
+                redirect_map.append({"from": url, "to": target, "reason": "404 -> closest live page"})
+
+    if fixed_titles or redirect_map:
+        server.seo_set_fixes(titles=fixed_titles, redirect_map=redirect_map)
 
     # starter recommendations from the detected issues (the skill writes richer ones)
     issues = sorted(server.RUN["issues"], key=lambda x: {"High":0,"Medium":1,"Low":2}.get(x["severity"],3))
@@ -78,7 +94,7 @@ def main():
     if not recs:
         recs.append("No issues detected on this crawl.")
     server.seo_recommend(recs)
-    server.RUN["model_calls"] = len(fixed_titles) if 'fixed_titles' in locals() else 0
+    server.RUN["model_calls"] = len(fixed_titles)
     server.RUN["duration_sec"] = round(time.time() - t0, 1)
     server.seo_report()
     server.seo_export()
