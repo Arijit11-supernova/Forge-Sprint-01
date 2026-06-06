@@ -22,4 +22,6 @@ Format:
 ---
 
 ## My log
-- `[--:--]` ...
+- `[10:15]` extracted starter bundle and run first test -> pipeline works end to end, 12 issue      types were detected on sample export.
+- `[10:30]` I reviewed detector.py -> starter only had 7 rules, completed all rulebook rules in plain Python/csv.
+- `[10:45]` I chose not to use pandas -> as standard csv library is faster, fewer dependencies, and also saves quota for model fixes.

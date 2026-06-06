@@ -23,5 +23,10 @@ Format per entry:
 ---
 
 ## My prompts
-1. ...
-2. ...
+1. **Prompt:** "Read Claude.md, seo/detector.py, and run.py. Then run python run.py ../     sample-export/ and show me the output." 
+   **For:** "Understanding the full pipeline and confirming it runs end to end.
+   **Revised?** No - worked first time. 12 issue types detected.
+
+2. **Prompt:** "Complete all 18 rulebook detectors in seo/detector.py - add title_too_short, missing_meta_description, duplicate_meta_description, meta_description_too_long, missing_h1, duplicate_h1, redirect_chain, thin _content, non_indexable_but_linked, slow_page."
+   **For:** Getting full rulebook coverage for maximum accuracy score. 
+   **Revised?** No - all the detectors were added successfullyin one pass. 
