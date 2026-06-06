@@ -30,5 +30,10 @@ dashboard at localhost:7700, and outputs `outputs/report.json` + `outputs/report
 - Run `python run.py sample-export/` to test end to end.
 
 ## Things I have learned during the build (update this as you go)
-- (e.g. "SF leaves Title 1 blank on redirected URLs — must filter Status Code 200 first")
-- ...
+- Sample export has no missing_title issues so title fixer will activate only on hidden export. 
+- All 18 rulebook rules implemented in seo/detector.py using plain csv module.
+- Must filter to text/html + indexable + status 200 before title/meta duplicate checks. 
+- Three output formats are working: report.json, report.html, report.pptx. 
+- Double braces are needed in f-strings inside HTML templates to escape CSS curly braces. 
+- Run / clear in Claude Code between unrelated.tasks to save quota. 
+- Redirect map uses slug matching to find closest live page for 4xx broken links.
