@@ -83,6 +83,58 @@ def main():
     server.seo_report()
     server.seo_export()
 
+    # --- PPTX Report Generator ---
+    try:
+        from pptx import Presentation
+        from datetime import date
+        import os
+
+        data = server.RUN
+        prs = Presentation()
+
+        # Slide 1: Title
+        slide = prs.slides.add_slide(prs.slide_layouts[0])
+        slide.shapes.title.text = f"SEO Audit Report: {data['site']}"
+        slide.placeholders[1].text = f"Generated on {date.today()}\nSEO Command Center"
+
+        # Slide 2: Summary
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = "Executive Summary"
+        sum_data = data['summary'] or {}
+        by_sev = sum_data.get('by_severity', {})
+        summary_text = (f"Total URLs Crawled: {data['urls']}\n"
+                        f"Total Issues Detected: {sum_data.get('total_issues', 0)}\n\n"
+                        f"High Severity: {by_sev.get('High', 0)}\n"
+                        f"Medium Severity: {by_sev.get('Medium', 0)}\n"
+                        f"Low Severity: {by_sev.get('Low', 0)}")
+        slide.placeholders[1].text = summary_text
+
+        # Slide 3: High Severity
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = "Critical Issues (High)"
+        high_issues = [i for i in data['issues'] if i['severity'] == 'High']
+        slide.placeholders[1].text = "\n".join([f"- {i['type']}: {i['count']} pages" for i in high_issues]) if high_issues else "No high severity issues found."
+
+        # Slide 4: Medium Severity
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = "Warning Issues (Medium)"
+        med_issues = [i for i in data['issues'] if i['severity'] == 'Medium']
+        slide.placeholders[1].text = "\n".join([f"- {i['type']}: {i['count']} pages" for i in med_issues]) if med_issues else "No medium severity issues found."
+
+        # Slide 5: Recommendations
+        slide = prs.slides.add_slide(prs.slide_layouts[1])
+        slide.shapes.title.text = "Top Recommendations"
+        recs = data.get('recommendations', [])
+        slide.placeholders[1].text = "\n".join([f"- {r}" for r in recs]) if recs else "No recommendations generated."
+
+        pptx_path = os.path.join(server.OUT_DIR, "report.pptx")
+        prs.save(pptx_path)
+        print(f"Wrote {pptx_path}")
+    except ImportError:
+        print("Skipping PPTX report: python-pptx not installed. Run 'pip install python-pptx' to enable.")
+    except Exception as e:
+        print(f"Error generating PPTX report: {e}")
+
     s = server.RUN["summary"]
     print("\n=== SEO AUDIT RESULT ===")
     print(f"Site         : {server.RUN['site']}  ({server.RUN['urls']} URLs)")

@@ -30,3 +30,7 @@ Format per entry:
 2. **Prompt:** "Complete all 18 rulebook detectors in seo/detector.py - add title_too_short, missing_meta_description, duplicate_meta_description, meta_description_too_long, missing_h1, duplicate_h1, redirect_chain, thin _content, non_indexable_but_linked, slow_page."
    **For:** Getting full rulebook coverage for maximum accuracy score. 
    **Revised?** No - all the detectors were added successfullyin one pass. 
+
+3. **Prompt:** "Add title fixer in run.py after seo_detect() using ollama API, limit to 5 URLs, 30 - 60 characters"
+   **For:** Champion tier title rewriting feature.
+   **Revised?** No - worked for first time.
