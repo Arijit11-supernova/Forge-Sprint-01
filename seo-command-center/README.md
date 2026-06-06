@@ -1,66 +1,58 @@
-# SEO Command Center — Forge Sprint 01 starter
+# SEO Command Center
 
-A Claude Code **plugin** that ingests a **Screaming Frog SEO export**, audits it against
-the rulebook, prioritizes the issues, writes fixes, and renders a **live dashboard** plus
-an exportable client report. The plumbing works out of the box — you implement the SEO
-logic and push accuracy on the hidden export.
+The SEO Command Center is a professional-grade tool for auditing Screaming Frog SEO exports. It transforms raw crawl data into actionable insights, providing deterministic rule-based detection, LLM-powered fixes, and client-ready reports.
 
-## Quick start (headless, proves it runs)
+## 🚀 Quick Start
+
+### 1. Installation
+Ensure you have Python 3.10+ installed. Install the required dependencies:
+
 ```bash
-pip install mcp          # exposes MCP tools to Claude Code (dashboard works without it too)
-python run.py sample-export/
-# open the live cockpit:
-#   http://localhost:7700
-# outputs land in outputs/report.json and outputs/report.html
+pip install mcp python-pptx
 ```
 
-## Inside Claude Code
-```
-/seo-audit sample-export/
-```
-
-## What's here
-```
-seo-command-center/
-├── .claude-plugin/plugin.json   plugin manifest (skill + command + agents + MCP)
-├── .claude/                     audit hooks (settings.json + hooks/audit.sh) → records your process
-├── skills/seo-audit/SKILL.md    orchestrator
-├── agents/                      ingest, auditor, fixer, reporter (sub-agents)
-├── commands/seo-audit.md        the /seo-audit command
-├── mcp/server.py                local MCP server + live dashboard host (localhost:7700)
-├── seo/detector.py              deterministic issue detection  ← EXTEND THIS to the full rulebook
-├── dashboard/                   index.html + app.js (the cockpit)
-├── scripts/export-transcript.sh saves your session transcript to agent-log.md (commit it)
-├── run.py                       headless runner (the grader's entry point)
-└── outputs/                     report.json + report.html (generated)
+**Note:** To enable the AI-powered Title Fixer, ensure [Ollama](https://ollama.com/) is running locally with the `gemma4:31b` model:
+```bash
+ollama pull gemma4:31b
 ```
 
-## Your job in the Sprint
-1. **Complete `seo/detector.py`** to cover the full `rulebook.md` (the starter only does a
-   few issue types). Accuracy on the hidden export is the biggest part of your score.
-2. **Implement the fixer** (titles/meta rewrites within limits + a redirect map) for the
-   champion tier — see `agents/fixer.md`.
-3. **Improve the dashboard / report** to be genuinely client-ready.
-4. **Commit incrementally** (≥10 commits) and let the audit hooks record your process.
+### 2. Running the Audit
+Run the headless pipeline on any Screaming Frog export directory:
 
-## Process + memory files you must maintain (graded — see challenge brief section 08)
-These are how the judges assess *how you worked with the AI*, not just the result:
-- `.claude/audit.jsonl` — auto-written by the hooks (every tool call). Commit it. Keep
-  `.claude/settings.json` in place so the hooks keep recording.
-- `agent-log.md` — run `bash scripts/export-transcript.sh` at the end to export your session
-  transcript. Commit it.
-- `CLAUDE.md` — your project memory / instructions for the agent. **Edit this as you build** —
-  good context engineering is the clearest signal of good practice.
-- `PROMPTS.md` — log your key prompts (the ones that moved the build).
-- `DECISIONS.md` — log your real decisions and what you learned / fixed.
+```bash
+python run.py path/to/your-export-folder/
+```
 
-The three records (audit log, transcript, git history) must agree — that is how a real process
-is told apart from a fabricated one. Do not edit or fake the logs.
+While the audit is running, you can monitor the progress in real-time via the **Live Dashboard**:
+👉 [http://localhost:7700](http://localhost:7700)
 
-## The model
-Run on the free local stack (Claude Code + Ollama). Set `OLLAMA_CONTEXT_LENGTH=65536`,
-use a tool-trained model (`qwen3.5:9b` or `gemma4:31b-cloud`), not `qwen2.5-coder`.
+## 📊 Generated Outputs
+The tool produces a comprehensive set of deliverables in the `outputs/` directory:
 
-## Note
-The dashboard renders the operator's own crawl data on localhost; it is a local cockpit,
-not a hardened public server. The shareable artifact is the exported `report.html`.
+| File | Description |
+| :--- | :--- |
+| `report.json` | Full machine-readable audit data for integration. |
+| `report.html` | **Client-Ready Report**: Professional, color-coded HTML dashboard with summary stats and prioritized issues. |
+| `report.pptx` | **Executive Presentation**: 5-slide summary including criticality breakdown and top recommendations. |
+
+## 🏗️ Architecture Overview
+
+The system follows a modular pipeline orchestrated by a set of specialized sub-agents:
+
+### 1. Ingest & Auditor Agent
+- **Ingest**: Parses `internal_all.csv` and other Screaming Frog exports.
+- **Auditor**: Executes deterministic SEO rules (defined in `seo/detector.py`) to identify issues such as missing titles, duplicate H1s, broken links (4xx/5xx), and thin content.
+
+### 2. Fixer Agent
+- **Intelligence**: Leverages local LLMs (via Ollama) to analyze problematic pages.
+- **Remediation**: Automatically generates optimized, professional SEO titles based on page H1s or URL slugs, ensuring they stay within the 30-60 character sweet spot.
+
+### 3. Reporter Agent
+- **Synthesis**: Aggregates findings into a prioritized list based on severity (High $\to$ Medium $\to$ Low).
+- **Delivery**: Translates technical data into high-fidelity formats (HTML, JSON, PPTX) suitable for stakeholders and clients.
+
+## 📁 Project Structure
+- `seo/detector.py`: The core engine for deterministic issue detection.
+- `mcp/server.py`: MCP server that powers the tools and the localhost dashboard.
+- `run.py`: Headless entry point for end-to-end audit execution.
+- `dashboard/`: Frontend assets for the live monitoring cockpit.
